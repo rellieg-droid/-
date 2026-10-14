@@ -5,7 +5,6 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: './', // <-- השורה שהוספנו: מתקנת את נתיבי הקבצים עבור GitHub Pages
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
