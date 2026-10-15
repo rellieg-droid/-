@@ -9,27 +9,20 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ביטול שוליים דיפולטיביים של Streamlit כדי שהאפליקציה תתפוס את כל המסך
+# ביטול שוליים דיפולטיביים של Streamlit
 st.markdown("""
 <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     .block-container {
-        padding-top: 0rem !important;
-        padding-bottom: 0rem !important;
-        padding-left: 0rem !important;
-        padding-right: 0rem !important;
+        padding: 0px !important;
         max-width: 100% !important;
-    }
-    iframe {
-        border: none !important;
-        width: 100% !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# האפליקציה המלאה עם כל הרכיבים האינטראקטיביים והחלון הקופץ המושלם
+# האפליקציה המלאה עם גובה מותאם ומובטח
 html_code = """
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
@@ -75,9 +68,8 @@ html_code = """
             display: flex;
             flex-direction: column;
             position: relative;
-            padding-bottom: 80px;
-            box-shadow: 0 0 25px rgba(0,0,0,0.05);
-            min-height: 100vh;
+            padding-bottom: 100px;
+            margin: 0 auto;
         }
 
         /* Header Bar */
@@ -145,7 +137,7 @@ html_code = """
             align-items: center;
             margin-bottom: 16px;
             background: white;
-            padding: 10px 14px;
+            padding: 12px 16px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
@@ -162,11 +154,6 @@ html_code = """
             display: flex;
             align-items: center;
             gap: 6px;
-            transition: all 0.2s;
-        }
-
-        .audio-btn:active {
-            transform: scale(0.96);
         }
 
         .audio-btn.stop {
@@ -204,7 +191,7 @@ html_code = """
             background-color: var(--highlight-hover);
         }
 
-        /* Modal Overlay & Popup - Exact Design */
+        /* Modal Overlay & Popup */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -228,7 +215,6 @@ html_code = """
             overflow: hidden;
             box-shadow: 0 15px 30px rgba(0,0,0,0.25);
             animation: popupIn 0.2s ease-out;
-            position: relative;
         }
 
         @keyframes popupIn {
@@ -253,11 +239,7 @@ html_code = """
         }
 
         .close-btn {
-            background: none;
-            border: none;
-            font-size: 1.4rem;
-            color: #94a3b8;
-            cursor: pointer;
+            background: none; border: none; font-size: 1.4rem; color: #94a3b8; cursor: pointer;
         }
 
         .popup-body {
@@ -266,198 +248,78 @@ html_code = """
         }
 
         .speaker-circle {
-            background: white;
-            border: none;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-            margin-bottom: 8px;
-            color: var(--primary);
-            font-size: 1.3rem;
+            background: white; border: none; border-radius: 50%;
+            width: 48px; height: 48px; display: inline-flex;
+            align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08); margin-bottom: 8px;
+            color: var(--primary); font-size: 1.3rem;
         }
 
         .popup-word {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 2px;
-            direction: ltr;
+            font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 2px; direction: ltr;
         }
 
         .popup-phonetic {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-bottom: 12px;
-            direction: ltr;
+            font-size: 0.85rem; color: #64748b; margin-bottom: 12px; direction: ltr;
         }
 
         .popup-translation {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #1e293b;
-            direction: rtl;
-            margin-bottom: 14px;
+            font-size: 1.5rem; font-weight: 800; color: #1e293b; direction: rtl; margin-bottom: 14px;
         }
 
         .popup-box {
-            background: white;
-            padding: 12px 14px;
-            border-radius: 12px;
-            text-align: right;
-            direction: rtl;
-            font-size: 0.9rem;
-            color: #475569;
-            margin-bottom: 10px;
+            background: white; padding: 12px 14px; border-radius: 12px;
+            text-align: right; direction: rtl; font-size: 0.9rem; color: #475569; margin-bottom: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.03);
         }
 
         .popup-sentence-box {
-            background: white;
-            padding: 12px 14px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: white; padding: 12px 14px; border-radius: 12px; margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center;
         }
 
-        .sentence-texts {
-            text-align: left;
-            direction: ltr;
-        }
+        .sentence-texts { text-align: left; direction: ltr; }
+        .sentence-es { font-size: 0.95rem; font-weight: 600; color: #1e293b; }
+        .sentence-he { font-size: 0.85rem; color: #64748b; direction: rtl; text-align: right; margin-top: 2px; }
 
-        .sentence-es {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #1e293b;
-        }
-
-        .sentence-he {
-            font-size: 0.85rem;
-            color: #64748b;
-            direction: rtl;
-            text-align: right;
-            margin-top: 2px;
-        }
-
-        .popup-actions {
-            display: flex;
-            width: 100%;
-        }
-
+        .popup-actions { display: flex; width: 100%; }
         .popup-btn {
-            flex: 1;
-            padding: 16px 0;
-            border: none;
-            font-size: 1.05rem;
-            font-weight: 800;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
+            flex: 1; padding: 16px 0; border: none; font-size: 1.05rem; font-weight: 800; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
         }
-
-        .btn-know {
-            background-color: var(--know-btn);
-            color: white;
-        }
-
-        .btn-learn {
-            background-color: var(--learn-btn);
-            color: white;
-        }
+        .btn-know { background-color: var(--know-btn); color: white; }
+        .btn-learn { background-color: var(--learn-btn); color: white; }
 
         /* Vocabulary Tab */
-        .vocab-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
+        .vocab-list { display: flex; flex-direction: column; gap: 12px; }
         .vocab-card {
-            background: white;
-            padding: 14px 18px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            background: white; padding: 14px 18px; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
         }
-
-        .vocab-es {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--primary-dark);
-            direction: ltr;
-        }
-
-        .vocab-he {
-            font-size: 0.95rem;
-            color: var(--text-sub);
-        }
+        .vocab-es { font-weight: 700; font-size: 1.1rem; color: var(--primary-dark); direction: ltr; }
+        .vocab-he { font-size: 0.95rem; color: var(--text-sub); }
 
         /* Practice Tab */
-        .quiz-card {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-        }
-
-        .quiz-question {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        .quiz-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
+        .quiz-card { background: white; border-radius: var(--border-radius); padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+        .quiz-question { font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; }
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
         .option-btn {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            text-align: right;
-            cursor: pointer;
+            background: #f8fafc; border: 2px solid #e2e8f0; padding: 12px 16px; border-radius: 10px;
+            font-size: 1rem; font-weight: 600; text-align: right; cursor: pointer;
         }
-
         .option-btn.correct { background: #dcfce7; border-color: #22c55e; color: #15803d; }
         .option-btn.wrong { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
 
         /* Bottom Nav */
         .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            max-width: 500px;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            border-top: 1px solid #e2e8f0;
-            padding: 10px 0;
-            z-index: 20;
+            position: fixed; bottom: 0; width: 100%; max-width: 500px;
+            background: white; display: flex; justify-content: space-around;
+            border-top: 1px solid #e2e8f0; padding: 10px 0; z-index: 20;
         }
-
         .nav-btn {
-            background: none; border: none;
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-            color: var(--text-sub); font-size: 0.8rem; font-weight: 600; cursor: pointer;
-            width: 33.33%;
+            background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px;
+            color: var(--text-sub); font-size: 0.8rem; font-weight: 600; cursor: pointer; width: 33.33%;
         }
-
         .nav-btn.active { color: var(--primary); }
         .nav-icon { font-size: 1.3rem; }
     </style>
@@ -483,7 +345,7 @@ html_code = """
             <span style="font-size: 0.85rem; color: var(--text-sub); font-weight: 600;">לחץ על מילה לתרגום</span>
         </div>
 
-        <div class="reader-card" id="storyText"></div>
+        <div class="reader-card" id="storyText">טוען סיפור...</div>
     </div>
 
     <!-- Tab 2: Vocab -->
@@ -526,7 +388,7 @@ html_code = """
             <div class="popup-translation" id="modalTranslation">חווה</div>
             
             <div class="popup-box" id="modalExplanation">
-                שם עצם בנקבה (la granja) - שטח חקלאי עם בעלי חיים וגידולים.
+                שטח חקלאי עם בעלי חיים וגידולים.
             </div>
 
             <div class="popup-sentence-box">
@@ -539,8 +401,8 @@ html_code = """
         </div>
 
         <div class="popup-actions">
-            <button class="popup-btn btn-know" onclick="markWord('known')">✓ I know it (יודע)</button>
-            <button class="popup-btn btn-learn" onclick="markWord('learn')">📖 Learn (ללמוד)</button>
+            <button class="popup-btn btn-know" onclick="markWord('known')">✓ I know it</button>
+            <button class="popup-btn btn-learn" onclick="markWord('learn')">📖 Learn</button>
         </div>
     </div>
 </div>
@@ -548,7 +410,7 @@ html_code = """
 <script>
     const wordData = {
         "vive": { translation: "חיה / גר", phonetic: "| VEE-veh |", explanation: "פועל שפירושו לחיות או לגור במקום מסוים.", sentence: "María vive en una granja.", sentenceHe: "מריה חיה בחווה." },
-        "granja": { translation: "חווה", phonetic: "| GRAHN-khah |", explanation: "שם עצם בנקבה (la granja) - שטח חקלאי עם בעלי חיים וגידולים.", sentence: "La granja tiene muchos animales.", sentenceHe: "בחווה יש חיות רבות." },
+        "granja": { translation: "חווה", phonetic: "| GRAHN-khah |", explanation: "שטח חקלאי עם בעלי חיים וגידולים.", sentence: "La granja tiene muchos animales.", sentenceHe: "בחווה יש חיות רבות." },
         "pequeña": { translation: "קטנה", phonetic: "| peh-KEH-nyah |", explanation: "תואר השם המתאר גודל קטן בלשון נקבה.", sentence: "Una casa pequeña.", sentenceHe: "בית קטן." },
         "mañana": { translation: "בוקר / מחר", phonetic: "| mah-NYAH-nah |", explanation: "שעות הבוקר המוקדמות.", sentence: "Cada mañana toma café.", sentenceHe: "בכל בוקר היא שותה קפה." },
         "temprano": { translation: "מוקדם", phonetic: "| tem-PRAH-noh |", explanation: "בשעה מוקדמת של היום.", sentence: "Se levanta temprano.", sentenceHe: "היא קמה מוקדם." },
@@ -602,9 +464,9 @@ html_code = """
     function openWordModal(word) {
         currentActiveWord = word;
         const info = wordData[word] || {
-            translation: "תרגום בסיסי",
+            translation: "תרגום",
             phonetic: `| ${word} |`,
-            explanation: "מילה בספרדית",
+            explanation: "הסבר מילה",
             sentence: word,
             sentenceHe: word
         };
@@ -759,5 +621,5 @@ html_code = """
 </html>
 """
 
-# הזרמת האפליקציה המלאה לתוך Streamlit
-components.html(html_code, height=850, scrolling=True)
+# הגדלת גובה המסגרת ל-1200 פיקסלים כדי להבטיח שכל תוכן הסיפור יוצג במלואו
+components.html(html_code, height=1200, scrolling=True)
