@@ -1,169 +1,763 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-# הגדרת תצורת העמוד
+# הגדרת העמוד לרחב וללא שוליים מיותרים
 st.set_page_config(
-    page_title="Español 10 - לימוד ספרדית",
+    page_title="Español 10",
     page_icon="🇪🇸",
-    layout="centered"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-# עיצוב מותאם אישית (CSS)
+# ביטול שוליים דיפולטיביים של Streamlit כדי שהאפליקציה תתפוס את כל המסך
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800&display=swap');
-    
-    html, body, [class*="css"] {
-        font-family: 'Heebo', sans-serif;
-        direction: rtl;
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    .block-container {
+        padding-top: 0rem !important;
+        padding-bottom: 0rem !important;
+        padding-left: 0rem !important;
+        padding-right: 0rem !important;
+        max-width: 100% !important;
     }
-    
-    .main-header {
-        text-align: center;
-        color: #4f46e5;
-        font-weight: 800;
-        margin-bottom: 20px;
-    }
-    
-    .hero-banner {
-        position: relative;
-        border-radius: 16px;
-        overflow: hidden;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    
-    .hero-banner img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-    }
-    
-    .hero-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(transparent, rgba(0,0,0,0.8));
-        color: white;
-        padding: 15px;
-        text-align: center;
-    }
-    
-    .word-box {
-        background-color: #fef08a;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-weight: 600;
-        cursor: pointer;
-        display: inline-block;
-        margin: 2px;
-    }
-    
-    .story-card {
-        background: white;
-        padding: 24px;
-        border-radius: 16px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        line-height: 2.2;
-        font-size: 1.25rem;
-        direction: ltr;
-        text-align: left;
+    iframe {
+        border: none !important;
+        width: 100% !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# כותרת האפליקציה
-st.markdown("<h1 class='main-header'>Español 10 🇪🇸</h1>", unsafe_allow_html=True)
+# האפליקציה המלאה עם כל הרכיבים האינטראקטיביים והחלון הקופץ המושלם
+html_code = """
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Español 10</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --highlight-bg: #fef08a;
+            --highlight-hover: #fde047;
+            --know-btn: #00a86b;
+            --learn-btn: #ff9900;
+            --border-radius: 16px;
+        }
 
-# תפריט לשוניות עליון
-tab1, tab2, tab3 = st.tabs(["📖 סיפורים", "💡 אוצר מילים", "✍️ תרגול"])
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-# נתונים ומילון
-WORD_DATA = {
-    "vive": {"he": "חיה / גר", "explanation": "פועל שפירושו לחיות או לגור במקום מסוים.", "sentence": "María vive en una granja.", "sentence_he": "מריה חיה בחווה."},
-    "granja": {"he": "חווה", "explanation": "שטח חקלאי עם גידולים וחיות משק.", "sentence": "La granja es grande.", "sentence_he": "החווה גדולה."},
-    "pequeña": {"he": "קטנה", "explanation": "תואר השם המתאר גודל קטן בלשון נקבה.", "sentence": "Una casa pequeña.", "sentence_he": "בית קטן."},
-    "mañana": {"he": "בוקר / מחר", "explanation": "שעות הבוקר המוקדמות.", "sentence": "Cada mañana toma café.", "sentence_he": "בכל בוקר היא שותה קפה."},
-    "temprano": {"he": "מוקדם", "explanation": "בשעה מוקדמת של היום.", "sentence": "Se levanta temprano.", "sentence_he": "היא קמה מוקדם."},
-    "gallinas": {"he": "תרנגולות", "explanation": "עוף משק המטיל ביצים.", "sentence": "Las gallinas comen maíz.", "sentence_he": "התרנגולות אוכלות תירס."},
-    "vacas": {"he": "פרות", "explanation": "בהמת משק הגדלה בחווה.", "sentence": "Las vacas dan leche.", "sentence_he": "הפרות נותנות חלב."},
-    "huevos": {"he": "ביצים", "explanation": "מזון שמגיע מהתרנגולות.", "sentence": "Recoge los huevos.", "sentence_he": "היא אוספת את הביצים."},
-    "plantas": {"he": "צמחים", "explanation": "צמחייה וגידולים בגינה.", "sentence": "Riega las plantas.", "sentence_he": "היא משקה את הצמחים."},
-    "árbol": {"he": "עץ", "explanation": "צמח עצי גדול בעל ענפים.", "sentence": "Bajo un árbol.", "sentence_he": "תחת עץ."},
-    "campo": {"he": "כפר / שדה", "explanation": "אזור כפרי מחוץ לעיר.", "sentence": "La vida en el campo.", "sentence_he": "החיים בכפר."}
-}
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
 
-STORY_TEXT = "María vive en una granja pequeña. Cada mañana, ella se levanta temprano. Da comida a las gallinas y a las vacas. Después, recoge los huevos y riega las plantas. Por la tarde, María lee un libro bajo un árbol. Le gusta mucho la vida en el campo."
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding-bottom: 80px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.05);
+            min-height: 100vh;
+        }
 
-# --- לשונית 1: סיפורים ---
-with tab1:
-    st.markdown("""
-    <div class="hero-banner">
-        <img src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&w=800&q=80" alt="Granja">
-        <div class="hero-overlay">
-            <h2>La Granja de María</h2>
-            <p>A1 - לימוד בסיסי - החווה של מריה</p>
+        /* Header Bar */
+        .app-header {
+            background: #ffffff;
+            padding: 14px 16px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .app-header h1 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%), 
+                        url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&w=800&q=80') center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .hero-banner h2 {
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            margin-bottom: 4px;
+        }
+
+        .hero-banner p {
+            font-size: 1.05rem;
+            font-weight: 600;
+            opacity: 0.95;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 16px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Control Bar */
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            background: white;
+            padding: 10px 14px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .audio-btn {
+            background: #eff6ff;
+            color: var(--primary);
+            border: 1px solid #bfdbfe;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .audio-btn:active {
+            transform: scale(0.96);
+        }
+
+        .audio-btn.stop {
+            background: #fef2f2;
+            color: #ef4444;
+            border-color: #fca5a5;
+        }
+
+        /* Story Reader */
+        .reader-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 22px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            line-height: 2.3;
+            font-size: 1.3rem;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .word-span {
+            cursor: pointer;
+            padding: 2px 5px;
+            border-radius: 4px;
+            transition: background-color 0.15s;
+            display: inline-block;
+        }
+
+        .word-span.highlight {
+            background-color: var(--highlight-bg);
+            font-weight: 500;
+        }
+
+        .word-span:hover, .word-span:active {
+            background-color: var(--highlight-hover);
+        }
+
+        /* Modal Overlay & Popup - Exact Design */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .word-popup {
+            background: #f1f5f9;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 340px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+            animation: popupIn 0.2s ease-out;
+            position: relative;
+        }
+
+        @keyframes popupIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .popup-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px 4px 16px;
+        }
+
+        .badge-status {
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+
+        .popup-body {
+            padding: 10px 20px 20px 20px;
+            text-align: center;
+        }
+
+        .speaker-circle {
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+
+        .popup-word {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 2px;
+            direction: ltr;
+        }
+
+        .popup-phonetic {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 12px;
+            direction: ltr;
+        }
+
+        .popup-translation {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1e293b;
+            direction: rtl;
+            margin-bottom: 14px;
+        }
+
+        .popup-box {
+            background: white;
+            padding: 12px 14px;
+            border-radius: 12px;
+            text-align: right;
+            direction: rtl;
+            font-size: 0.9rem;
+            color: #475569;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+
+        .popup-sentence-box {
+            background: white;
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sentence-texts {
+            text-align: left;
+            direction: ltr;
+        }
+
+        .sentence-es {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .sentence-he {
+            font-size: 0.85rem;
+            color: #64748b;
+            direction: rtl;
+            text-align: right;
+            margin-top: 2px;
+        }
+
+        .popup-actions {
+            display: flex;
+            width: 100%;
+        }
+
+        .popup-btn {
+            flex: 1;
+            padding: 16px 0;
+            border: none;
+            font-size: 1.05rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-know {
+            background-color: var(--know-btn);
+            color: white;
+        }
+
+        .btn-learn {
+            background-color: var(--learn-btn);
+            color: white;
+        }
+
+        /* Vocabulary Tab */
+        .vocab-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .vocab-card {
+            background: white;
+            padding: 14px 18px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .vocab-es {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary-dark);
+            direction: ltr;
+        }
+
+        .vocab-he {
+            font-size: 0.95rem;
+            color: var(--text-sub);
+        }
+
+        /* Practice Tab */
+        .quiz-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+
+        .quiz-question {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-btn {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: right;
+            cursor: pointer;
+        }
+
+        .option-btn.correct { background: #dcfce7; border-color: #22c55e; color: #15803d; }
+        .option-btn.wrong { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid #e2e8f0;
+            padding: 10px 0;
+            z-index: 20;
+        }
+
+        .nav-btn {
+            background: none; border: none;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            color: var(--text-sub); font-size: 0.8rem; font-weight: 600; cursor: pointer;
+            width: 33.33%;
+        }
+
+        .nav-btn.active { color: var(--primary); }
+        .nav-icon { font-size: 1.3rem; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header class="app-header">
+        <h1>Español 10</h1>
+    </header>
+
+    <!-- Tab 1: Story -->
+    <div id="tab-story" class="tab-content active">
+        <div class="hero-banner">
+            <h2>UN DÍA EN LA GRANJA</h2>
+            <p>MARÍA Y SU VIDA EN EL CAMPO</p>
+        </div>
+
+        <div class="controls-bar" style="margin-top: 16px;">
+            <button class="audio-btn" id="playStoryBtn" onclick="togglePlayStory()">
+                <span id="audioIcon">🔊</span> <span id="audioText">השמע סיפור</span>
+            </button>
+            <span style="font-size: 0.85rem; color: var(--text-sub); font-weight: 600;">לחץ על מילה לתרגום</span>
+        </div>
+
+        <div class="reader-card" id="storyText"></div>
+    </div>
+
+    <!-- Tab 2: Vocab -->
+    <div id="tab-vocab" class="tab-content">
+        <h2 style="margin-bottom: 16px; font-size: 1.2rem;">אוצר מילים שנלמד (<span id="vocabCount">0</span>)</h2>
+        <div class="vocab-list" id="vocabList"></div>
+    </div>
+
+    <!-- Tab 3: Practice -->
+    <div id="tab-practice" class="tab-content">
+        <h2 style="margin-bottom: 16px; font-size: 1.2rem;">תרגול הבנה</h2>
+        <div class="quiz-card" id="quizContainer"></div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="switchTab('story', this)">
+            <span class="nav-icon">📖</span><span>סיפורים</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('vocab', this)">
+            <span class="nav-icon">💡</span><span>אוצר מילים</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('practice', this)">
+            <span class="nav-icon">✍️</span><span>תרגול</span>
+        </button>
+    </nav>
+</div>
+
+<!-- Modal Popup -->
+<div class="modal-overlay" id="wordModal" onclick="closeModal(event)">
+    <div class="word-popup" onclick="event.stopPropagation()">
+        <div class="popup-top-bar">
+            <span class="badge-status">מילון ספרדית-עברית</span>
+            <button class="close-btn" onclick="closeModal()">✕</button>
+        </div>
+        <div class="popup-body">
+            <button class="speaker-circle" onclick="speakCurrentWord()">🔊</button>
+            <div class="popup-word" id="modalWord">granja</div>
+            <div class="popup-phonetic" id="modalPhonetic">| GRAHN-khah |</div>
+            <div class="popup-translation" id="modalTranslation">חווה</div>
+            
+            <div class="popup-box" id="modalExplanation">
+                שם עצם בנקבה (la granja) - שטח חקלאי עם בעלי חיים וגידולים.
+            </div>
+
+            <div class="popup-sentence-box">
+                <div class="sentence-texts">
+                    <div class="sentence-es" id="modalSentence">La granja tiene muchos animales.</div>
+                    <div class="sentence-he" id="modalSentenceHe">בחווה יש חיות רבות.</div>
+                </div>
+                <button class="speaker-circle" style="width: 36px; height: 36px; font-size: 1rem; margin:0;" onclick="speakSentence()">🔊</button>
+            </div>
+        </div>
+
+        <div class="popup-actions">
+            <button class="popup-btn btn-know" onclick="markWord('known')">✓ I know it (יודע)</button>
+            <button class="popup-btn btn-learn" onclick="markWord('learn')">📖 Learn (ללמוד)</button>
         </div>
     </div>
-    """, unsafe_allow_html=True)
-    
-    # כפתור השמעת הסיפור
-    if st.button("🔊 השמע סיפור מלא בספרדית"):
-        components.html(f"""
-            <script>
-                var msg = new SpeechSynthesisUtterance("{STORY_TEXT}");
-                msg.lang = 'es-ES';
-                msg.rate = 0.85;
-                window.speechSynthesis.speak(msg);
-            </script>
-        """, height=0)
+</div>
 
-    st.subheader("קראי את הסיפור (לחצי על מילה להסבר):")
-    
-    # הצגת הסיפור בחלוקה למילים
-    selected_word = st.selectbox("בחרי מילה מתוך הסיפור כדי לראות תרגום והסבר:", [""] + list(WORD_DATA.keys()))
-    
-    st.markdown(f"<div class='story-card'>{STORY_TEXT}</div>", unsafe_allow_html=True)
-    
-    if selected_word:
-        info = WORD_DATA[selected_word]
-        st.info(f"**מילה:** {selected_word} | **תרגום:** {info['he']}\n\n"
-                f"**הסבר:** {info['explanation']}\n\n"
-                f"**משפט דוגמה:** {info['sentence']} ({info['sentence_he']})")
-        
-        if st.button(f"🔊 השמע את המילה '{selected_word}'"):
-            components.html(f"""
-                <script>
-                    var msg = new SpeechSynthesisUtterance("{selected_word}");
-                    msg.lang = 'es-ES';
-                    window.speechSynthesis.speak(msg);
-                </script>
-            """, height=0)
+<script>
+    const wordData = {
+        "vive": { translation: "חיה / גר", phonetic: "| VEE-veh |", explanation: "פועל שפירושו לחיות או לגור במקום מסוים.", sentence: "María vive en una granja.", sentenceHe: "מריה חיה בחווה." },
+        "granja": { translation: "חווה", phonetic: "| GRAHN-khah |", explanation: "שם עצם בנקבה (la granja) - שטח חקלאי עם בעלי חיים וגידולים.", sentence: "La granja tiene muchos animales.", sentenceHe: "בחווה יש חיות רבות." },
+        "pequeña": { translation: "קטנה", phonetic: "| peh-KEH-nyah |", explanation: "תואר השם המתאר גודל קטן בלשון נקבה.", sentence: "Una casa pequeña.", sentenceHe: "בית קטן." },
+        "mañana": { translation: "בוקר / מחר", phonetic: "| mah-NYAH-nah |", explanation: "שעות הבוקר המוקדמות.", sentence: "Cada mañana toma café.", sentenceHe: "בכל בוקר היא שותה קפה." },
+        "temprano": { translation: "מוקדם", phonetic: "| tem-PRAH-noh |", explanation: "בשעה מוקדמת של היום.", sentence: "Se levanta temprano.", sentenceHe: "היא קמה מוקדם." },
+        "gallinas": { translation: "תרנגולות", phonetic: "| gah-YEE-nahs |", explanation: "עוף משק המטיל ביצים.", sentence: "Las gallinas comen maíz.", sentenceHe: "התרנגולות אוכלות תירס." },
+        "vacas": { translation: "פרות", phonetic: "| VAH-kahs |", explanation: "בהמת משק הגדלה בחווה.", sentence: "Las vacas dan leche.", sentenceHe: "הפרות נותנות חלב." },
+        "huevos": { translation: "ביצים", phonetic: "| WEH-vohs |", explanation: "מזון שמגיע מהתרנגולות.", sentence: "Recoge los huevos.", sentenceHe: "היא אוספת את הביצים." },
+        "plantas": { translation: "צמחים", phonetic: "| PLAHN-tahs |", explanation: "צמחייה וגידולים בגינה.", sentence: "Riega las plantas.", sentenceHe: "היא משקה את הצמחים." },
+        "árbol": { translation: "עץ", phonetic: "| AHR-bohl |", explanation: "צמח עצי גדול בעל ענפים.", sentence: "Bajo un árbol.", sentenceHe: "תחת עץ." },
+        "campo": { translation: "כפר / שדה", phonetic: "| KAHM-poh |", explanation: "אזור כפרי מחוץ לעיר.", sentence: "La vida en el campo.", sentenceHe: "החיים בכפר." },
+        "María": { translation: "מריה", phonetic: "| mah-REE-ah |", explanation: "שם פרטי של אישה.", sentence: "María lee un libro.", sentenceHe: "מריה קוראת ספר." },
+        "cada": { translation: "כל", phonetic: "| KAH-dah |", explanation: "ביטוי לכל דבר ודבר.", sentence: "Cada día es nuevo.", sentenceHe: "כל יום הוא חדש." },
+        "comida": { translation: "אוכל / מזון", phonetic: "| koh-MEE-dah |", explanation: "מזון המיועד למאכל.", sentence: "Da comida a las vacas.", sentenceHe: "נותנת אוכל לפרות." },
+        "libro": { translation: "ספר", phonetic: "| LEE-broh |", explanation: "ספר קריאה.", sentence: "Lee un libro.", sentenceHe: "קוראת ספר." },
+        "vida": { translation: "חיים", phonetic: "| VEE-dah |", explanation: "אורח החיים.", sentence: "Le gusta la vida.", sentenceHe: "היא אוהבת את החיים." }
+    };
 
-# --- לשונית 2: אוצר מילים ---
-with tab2:
-    st.subheader("💡 מילון ואוצר מילים שנלמד")
-    for word, details in WORD_DATA.items():
-        with st.expander(f"🇪🇸 {word} - {details['he']}"):
-            st.write(f"**הסבר:** {details['explanation']}")
-            st.write(f"**משפט דוגמה:** {details['sentence']}")
-            st.write(f"**תרגום המשפט:** {details['sentence_he']}")
+    const rawStory = "María vive en una granja pequeña. Cada mañana, ella se levanta temprano. Da comida a las gallinas y a las vacas. Después, recoge los huevos y riega las plantas. Por la tarde, María lee un libro bajo un árbol. Le gusta mucho la vida en el campo.";
 
-# --- לשונית 3: תרגול ---
-with tab3:
-    st.subheader("✍️ תרגול הבנה")
-    q1 = st.radio("1. איפה מריה חיה?", ["באירופה", "בחווה קטנה", "בעיר גדולה", "ליד הים"], index=None)
-    if q1:
-        if q1 == "בחווה קטנה":
-            st.success("נכון מאוד! 🎉 (María vive en una granja pequeña)")
-        else:
+    const quizQuestions = [
+        { question: "איפה מריה חיה?", options: ["באירופה", "בחווה קטנה", "בעיר גדולה", "ליד הים"], answer: 1 },
+        { question: "מה מריה עושה בבוקר?", options: ["קוראת ספר", "נוסעת לעיר", "נותנת אוכל לתרנגולות ולפרות"], answer: 2 },
+        { question: "איפה מריה קוראת ספר אחה\"צ?", options: ["בתוך הבית", "תחת עץ", "ברכב"], answer: 1 }
+    ];
 
-            st.error("לא מדויק, נסי שוב.")
+    let learnedWords = JSON.parse(localStorage.getItem('es10_learned_words')) || {};
+    let currentActiveWord = "";
+    let isSpeaking = false;
 
-    q2 = st.radio("2. מה מריה עושה בבוקר?", ["קוראת ספר", "נוסעת לעיר", "נותנת אוכל לתרנגולות ולפרות"], index=None)
-    if q2:
-        if q2 == "נותנת אוכל לתרנגולות ולפרות":
-            st.success("מעולה! 👏 (Da comida a las gallinas y a las vacas)")
-        else:
-            st.error("לא מדויק, נסי שוב.")
+    window.onload = function() {
+        renderStory();
+        renderVocab();
+        renderQuiz();
+    };
+
+    function renderStory() {
+        const container = document.getElementById('storyText');
+        const words = rawStory.split(/(\s+|,|\.|\;)/);
+        let html = "";
+        words.forEach(token => {
+            const clean = token.replace(/[^a-zA-ZáéíóúñÁÉÍÓÚÑ]/g, "");
+            if (clean && (wordData[clean] || wordData[clean.toLowerCase()])) {
+                const key = wordData[clean] ? clean : clean.toLowerCase();
+                html += `<span class="word-span highlight" onclick="openWordModal('${key}')">${token}</span>`;
+            } else {
+                html += `<span class="word-span">${token}</span>`;
+            }
+        });
+        container.innerHTML = html;
+    }
+
+    function openWordModal(word) {
+        currentActiveWord = word;
+        const info = wordData[word] || {
+            translation: "תרגום בסיסי",
+            phonetic: `| ${word} |`,
+            explanation: "מילה בספרדית",
+            sentence: word,
+            sentenceHe: word
+        };
+
+        document.getElementById('modalWord').innerText = word;
+        document.getElementById('modalPhonetic').innerText = info.phonetic;
+        document.getElementById('modalTranslation').innerText = info.translation;
+        document.getElementById('modalExplanation').innerText = info.explanation;
+        document.getElementById('modalSentence').innerText = info.sentence;
+        document.getElementById('modalSentenceHe').innerText = info.sentenceHe;
+
+        document.getElementById('wordModal').classList.add('active');
+        speakText(word);
+    }
+
+    function closeModal() {
+        document.getElementById('wordModal').classList.remove('active');
+    }
+
+    function speakText(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'es-ES';
+            utterance.rate = 0.85;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function speakCurrentWord() {
+        if (currentActiveWord) speakText(currentActiveWord);
+    }
+
+    function speakSentence() {
+        if (currentActiveWord && wordData[currentActiveWord]) {
+            speakText(wordData[currentActiveWord].sentence);
+        }
+    }
+
+    function togglePlayStory() {
+        const icon = document.getElementById('audioIcon');
+        const text = document.getElementById('audioText');
+        const btn = document.getElementById('playStoryBtn');
+
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            icon.innerText = "🔊";
+            text.innerText = "השמע סיפור";
+            btn.classList.remove('stop');
+        } else {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(rawStory);
+                utterance.lang = 'es-ES';
+                utterance.rate = 0.85;
+                
+                utterance.onend = () => {
+                    isSpeaking = false;
+                    icon.innerText = "🔊";
+                    text.innerText = "השמע סיפור";
+                    btn.classList.remove('stop');
+                };
+
+                window.speechSynthesis.speak(utterance);
+                isSpeaking = true;
+                icon.innerText = "⏹️";
+                text.innerText = "עצור הקראה";
+                btn.classList.add('stop');
+            }
+        }
+    }
+
+    function markWord(type) {
+        if (currentActiveWord && wordData[currentActiveWord]) {
+            learnedWords[currentActiveWord] = {
+                word: currentActiveWord,
+                translation: wordData[currentActiveWord].translation,
+                status: type
+            };
+            localStorage.setItem('es10_learned_words', JSON.stringify(learnedWords));
+            renderVocab();
+        }
+        closeModal();
+    }
+
+    function renderVocab() {
+        const list = document.getElementById('vocabList');
+        const count = document.getElementById('vocabCount');
+        const keys = Object.keys(learnedWords);
+        count.innerText = keys.length;
+
+        if (keys.length === 0) {
+            list.innerHTML = `<div style="text-align:center; color: var(--text-sub); padding: 30px;">עדיין לא הוספת מילים. לחצי על מילת מפתח בסיפור כדי ללמוד אותה!</div>`;
+            return;
+        }
+
+        list.innerHTML = keys.map(k => `
+            <div class="vocab-card">
+                <div>
+                    <div class="vocab-es">${k}</div>
+                    <div class="vocab-he">${learnedWords[k].translation}</div>
+                </div>
+                <button class="speaker-circle" style="width:36px; height:36px; font-size:1rem; margin:0;" onclick="speakText('${k}')">🔊</button>
+            </div>
+        `).join('');
+    }
+
+    function renderQuiz() {
+        const container = document.getElementById('quizContainer');
+        container.innerHTML = quizQuestions.map((q, qIndex) => `
+            <div style="margin-bottom: 20px;">
+                <div class="quiz-question">${qIndex + 1}. ${q.question}</div>
+                <div class="quiz-options">
+                    ${q.options.map((opt, oIndex) => `
+                        <button class="option-btn" onclick="checkAnswer(${qIndex}, ${oIndex}, this)">${opt}</button>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function checkAnswer(qIndex, selectedIndex, btn) {
+        const parent = btn.parentElement;
+        const buttons = parent.querySelectorAll('.option-btn');
+        const correctIndex = quizQuestions[qIndex].answer;
+
+        buttons.forEach((b, i) => {
+            b.disabled = true;
+            if (i === correctIndex) b.classList.add('correct');
+            else if (i === selectedIndex) b.classList.add('wrong');
+        });
+    }
+
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+        btn.classList.add('active');
+
+        if (isSpeaking) {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            document.getElementById('audioIcon').innerText = "🔊";
+            document.getElementById('audioText').innerText = "השמע סיפור";
+            document.getElementById('playStoryBtn').classList.remove('stop');
+        }
+    }
+</script>
+</body>
+</html>
+"""
+
+# הזרמת האפליקציה המלאה לתוך Streamlit
+components.html(html_code, height=850, scrolling=True)
