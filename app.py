@@ -22,7 +22,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# האפליקציה המלאה עם גובה מותאם ומובטח
+# האפליקציה המלאה עם טעינה מיידית מובטחת
 html_code = """
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
@@ -439,14 +439,10 @@ html_code = """
     let currentActiveWord = "";
     let isSpeaking = false;
 
-    window.onload = function() {
-        renderStory();
-        renderVocab();
-        renderQuiz();
-    };
-
+    // הפעלה מיידית של רינדור הסיפור (בלי לחכות ל-onload)
     function renderStory() {
         const container = document.getElementById('storyText');
+        if (!container) return;
         const words = rawStory.split(/(\s+|,|\.|\;)/);
         let html = "";
         words.forEach(token => {
@@ -556,6 +552,7 @@ html_code = """
     function renderVocab() {
         const list = document.getElementById('vocabList');
         const count = document.getElementById('vocabCount');
+        if (!list || !count) return;
         const keys = Object.keys(learnedWords);
         count.innerText = keys.length;
 
@@ -577,6 +574,7 @@ html_code = """
 
     function renderQuiz() {
         const container = document.getElementById('quizContainer');
+        if (!container) return;
         container.innerHTML = quizQuestions.map((q, qIndex) => `
             <div style="margin-bottom: 20px;">
                 <div class="quiz-question">${qIndex + 1}. ${q.question}</div>
@@ -616,10 +614,16 @@ html_code = """
             document.getElementById('playStoryBtn').classList.remove('stop');
         }
     }
+
+    // הפעלה מיידית של הפונקציות בטעינת הסקריפט
+    setTimeout(() => {
+        renderStory();
+        renderVocab();
+        renderQuiz();
+    }, 50);
 </script>
 </body>
 </html>
 """
 
-# הגדלת גובה המסגרת ל-1200 פיקסלים כדי להבטיח שכל תוכן הסיפור יוצג במלואו
 components.html(html_code, height=1200, scrolling=True)
